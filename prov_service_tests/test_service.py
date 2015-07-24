@@ -69,23 +69,6 @@ class ServiceTestCase(unittest.TestCase):
     with open(os.path.join(directory, file_name), "r") as f:
           return f.read()
 
-  def get_document(self, file_name):
-    """Load document with given name from "documents" directory
-    assumed to be in the same directory as the calling test class.
-    
-    :param file_name: file name
-    :type file_name: str or unicode
-    :returns: document
-    :rtype: str or unicode
-    :raises OSError: if there are problems accessing the directory
-    or loading the file
-    """
-    directory = os.path.join(
-      os.path.dirname(os.path.abspath(inspect.getfile(
-            inspect.currentframe()))), "documents")
-    with open(os.path.join(directory, file_name), "r") as f:
-          return f.read()
-
   def get_primer(self, format):
     """Load "primer" document of given format from "documents"
     directory assumed to be in the same directory as the calling test
