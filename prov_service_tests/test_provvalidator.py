@@ -61,7 +61,7 @@ class ProvValidatorTestCase(ServiceTestCase):
 
   @parameterized.expand(standards.FORMATS)
   def test_validate(self, format):
-    document = self.get_document(format)
+    document = self.get_primer(format)
     headers = {http.ACCEPT: "text/html"}
     files = {"statements": document}
     data = {"validate": "Validate", "type": format}
@@ -73,7 +73,7 @@ class ProvValidatorTestCase(ServiceTestCase):
 
   @parameterized.expand(standards.FORMATS)
   def test_simple_translate(self, format):
-    document = self.get_document(format)
+    document = self.get_primer(format)
     content_type = ProvValidatorTestCase.CONTENT_TYPES[format]
     accept_type = ProvValidatorTestCase.CONTENT_TYPES[format]
     headers = {http.CONTENT_TYPE: content_type, 
@@ -85,7 +85,7 @@ class ProvValidatorTestCase(ServiceTestCase):
 
   @parameterized.expand(standards.FORMATS)
   def test_simple_translate_no_redirect(self, format):
-    document = self.get_document(format)
+    document = self.get_primer(format)
     content_type = ProvValidatorTestCase.CONTENT_TYPES[format]
     accept_type = ProvValidatorTestCase.CONTENT_TYPES[format]
     headers = {http.CONTENT_TYPE: content_type, 

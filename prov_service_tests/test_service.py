@@ -43,13 +43,22 @@ class ServiceTestCase(unittest.TestCase):
   def setUp(self):
     super(ServiceTestCase, self).setUp()
 
-  def get_document(self, format):
-    """Load document with given extension from "documents" directory
+  PRIMER_DOCUMENTS = {
+    standards.PROVN: "primer.provn",
+    standards.TTL: "primer.ttl",
+    standards.TRIG: "primer.trig",
+    standards.PROVX: "primer.provx",
+    standards.JSON: "primer.json"
+  }
+  """dict: mapping ``prov_service_tests.standards to primer.* files"""
+
+  def get_document(self, file_name):
+    """Load document with given name from "documents" directory
     assumed to be in the same directory as the calling test class.
     
-    :param format: file format as defined in ``prov.standards```
-    :type format: str or unicode
-    :returns: document in requested format
+    :param file_name: file name
+    :type file_name: str or unicode
+    :returns: document
     :rtype: str or unicode
     :raises OSError: if there are problems accessing the directory
     or loading the file
@@ -57,7 +66,36 @@ class ServiceTestCase(unittest.TestCase):
     directory = os.path.join(
       os.path.dirname(os.path.abspath(inspect.getfile(
             inspect.currentframe()))), "documents")
-    for file_name in os.listdir(directory):
-      if os.path.splitext(file_name)[1][1:] == format:
-        with open(os.path.join(directory, file_name), "r") as f:
+    with open(os.path.join(directory, file_name), "r") as f:
           return f.read()
+
+  def get_document(self, file_name):
+    """Load document with given name from "documents" directory
+    assumed to be in the same directory as the calling test class.
+    
+    :param file_name: file name
+    :type file_name: str or unicode
+    :returns: document
+    :rtype: str or unicode
+    :raises OSError: if there are problems accessing the directory
+    or loading the file
+    """
+    directory = os.path.join(
+      os.path.dirname(os.path.abspath(inspect.getfile(
+            inspect.currentframe()))), "documents")
+    with open(os.path.join(directory, file_name), "r") as f:
+          return f.read()
+
+  def get_primer(self, format):
+    """Load "primer" document of given format from "documents"
+    directory assumed to be in the same directory as the calling test
+    class. 
+    
+    :param format: one of ``prov_service_tests.standards``
+    :type format: str or unicode
+    :returns: document
+    :rtype: str or unicode
+    :raises OSError: if there are problems accessing the directory
+    or loading the file
+    """
+    return self.get_document(ServiceTestCase.PRIMER_DOCUMENTS[format])
