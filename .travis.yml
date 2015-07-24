@@ -1,0 +1,14 @@
+language: python
+
+python:
+  - 2.7
+  - 3.4
+
+install:
+  - pip install -r requirements.txt
+  - export PROVVALIDATOR_URL=https://provenance.ecs.soton.ac.uk/validator/provapi/documents/
+  - export PROVSTORE_URL=https://provenance.ecs.soton.ac.uk/store/api/v0/documents/
+# PROVSTORE_API_KEY value must be defined in Travis CI job configuration
+
+script:
+  - nosetests -v --nocapture
