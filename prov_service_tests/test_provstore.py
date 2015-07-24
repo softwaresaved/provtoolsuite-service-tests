@@ -59,9 +59,14 @@ class ProvStoreTestCase(ServiceTestCase):
     standards.PROVX: "application/xml",
     standards.JSON: "application/json"
   }
-  """dict: mapping from formats in ``prov_service_tests..standards``
-  to content types 
+  """dict: mapping from formats in ``prov_service_tests.standards``
+  to content types understood by ProvStore
   """
+
+  EXTENSIONS = {standards.PROVX: "xml"}
+  """dict: mapping from formats in ``prov_service_tests.standards`` to
+  file extensions understood by ProvStore
+` """
 
   def setUp(self):
     super(ProvStoreTestCase, self).setUp()
@@ -72,64 +77,36 @@ class ProvStoreTestCase(ServiceTestCase):
   def tearDown(self):
     super(ProvStoreTestCase, self).tearDown()
     if self.document_url is not None:
-      try:
-        response = requests.delete( \
-          self.document_url, 
-          headers={http.AUTHORIZATION: self.authorization})
-        if (response.status_code != requests.codes.no_content):
-          self.delete_document_warning()
-      except Exception as exception:
-        self.delete_document_warning()
+      response = requests.delete( \
+        self.document_url, 
+        headers={http.AUTHORIZATION: self.authorization})
+      if response.status_code != requests.codes.no_content:
+        print("Warning: " + self.document_url + " may not have been deleted")
 
-  def delete_document_warning(self):
-    """Print a warning that a document could not be deleted.
-    """
-    print("Warning: " + self.document_url + " could not be deleted")
-
-  def post(self, url, content_type, accept_type, request):
-    """Submit authorized POST request and return response.
-
-    :param url: URL
-    :type url: str or unicode
-    :param content_type: Content-type value
-    :type content_type: str or unicode
-    :param accept_type: Accept value
-    :type accept_type: str or unicode
-    :param request: request
-    :type request: dict
-    :return: response
-    :rtype: :class:`~requests.Response``
-    """
-    headers = {http.CONTENT_TYPE: content_type, 
-               http.ACCEPT: accept_type,
-               http.AUTHORIZATION: self.authorization}
-    return requests.post(url, 
-                         headers=headers, 
-                         data=json.dumps(request))
-
-  def post_document(self, format, document):
+  def post(self, document, format=standards.JSON):
     """Submit authorized POST /store/api/v0/documents/
     request. The document URL is cached by the class. A test is done
     to check that the response code is 201 CREATED.
-
-    :param format: one of ``prov_service_tests.standards`` formats
-    :type format: str or unicode
+    
     :param document: document in given format
     :type document: str or unicode
-    :return: response
-    :rtype: :class:`~requests.Response``
+    :param format: one of ``prov_service_tests.standards`` formats
+    :type format: str or unicode
+    :return: URL of stored document
+    :rtype: str or unicode
     """
-    store_request = {"content": document, 
-                     "public": True, 
-                     "rec_id": self.__class__.__name__}
-    response = self.post(self.url,
-                         ProvStoreTestCase.CONTENT_TYPES[format],
-                         ProvStoreTestCase.CONTENT_TYPES[standards.JSON],
-                         store_request)
+    headers = {http.CONTENT_TYPE: ProvStoreTestCase.CONTENT_TYPES[format],
+               http.ACCEPT: ProvStoreTestCase.CONTENT_TYPES[standards.JSON],
+               http.AUTHORIZATION: self.authorization}
+    request = {"content": document, 
+               "public": True, 
+               "rec_id": self.__class__.__name__}
+    response = requests.post(self.url, 
+                             headers=headers, 
+                             data=json.dumps(request))
     self.assertEqual(requests.codes.created, response.status_code)
     response_json = json.loads(response.text)
-    self.document_url = self.url + str(response_json["id"])
-    return response
+    return self.url + str(response_json["id"])
 
   def test_get_documents(self):
     """Test GET /store/api/v0/documents/.
@@ -141,69 +118,85 @@ class ProvStoreTestCase(ServiceTestCase):
   def test_post_document(self, format):
     """Test POST /store/api/v0/documents/.
     """
-    response = self.post_document(format, self.get_primer(format))
+    self.document_url = self.post(self.get_primer(format), format)
     self.assertNotEqual(None, self.document_url)
 
   def test_delete_document(self):
     """Test DELETE /store/api/v0/documents/:id/.
     """
-    format = standards.JSON
-    response = self.post_document(format, self.get_primer(format))
+    self.document_url = self.post(self.get_primer(standards.JSON))
 
-    response = requests.delete( \
-      self.document_url, 
-      headers={http.AUTHORIZATION: self.authorization})
+    headers = {http.AUTHORIZATION: self.authorization}
+    response = requests.delete(self.document_url, headers=headers)
     self.assertEqual(requests.codes.no_content, response.status_code)
     self.document_url = None
 
   def test_get_document(self):
-    """GET /store/api/v0/documents/:id/.
+    """Test GET /store/api/v0/documents/:id/.
     """
-    format = standards.JSON
-    response = self.post_document(format, self.get_primer(format))
+    self.document_url = self.post(self.get_primer(standards.JSON))
 
     response = requests.get(self.document_url)
     self.assertEqual(requests.codes.ok, response.status_code)
 
   @parameterized.expand(standards.FORMATS)
   def test_get_document_format(self, format):
-    """GET /store/api/v0/documents/:id.:format, 
+    """Test GET /store/api/v0/documents/:id.:format.
     """
-    response = self.post_document(format, self.get_primer(format))
-    # Get document in each format.
-    for get_format in standards.FORMATS:
-      response = requests.get( \
-        self.document_url + "." + get_format, 
-        headers={http.ACCEPT: ProvStoreTestCase.CONTENT_TYPES[get_format]})
-      self.assertEqual(requests.codes.ok, response.status_code)
+    self.document_url = self.post(self.get_primer(standards.JSON))
+    # Map format to extension supported by ProvStore
+    if format in ProvStoreTestCase.EXTENSIONS:
+      format = ProvStoreTestCase.EXTENSIONS[format]
+    response = requests.get(self.document_url + "." + format)
+    self.assertEqual(requests.codes.ok, response.status_code)
 
   def test_get_document_bundles(self):
-    """GET /store/api/v0/documents/:id/bundles 
+    """Test GET /store/api/v0/documents/:id/bundles.
     """
-    format = standards.JSON
-    response = self.post_document(format, self.get_primer(format))
+    self.document_url = self.post(self.get_primer(standards.JSON))
+
     response = requests.get(self.document_url + "/bundles")
     self.assertEqual(requests.codes.ok, response.status_code)
 
-  def test_get_document_bundles_bundle_format(self):
-    """GET /store/api/v0/documents/:doc_id/bundles/:bundle_id(.:format)
-    """
-    format = standards.JSON
-    response = self.post_document(format, self.get_document("bundle.json"))
+  def post_bundle(self, document):
+    """Submit GET /store/api/v0/documents/:doc_id/bundles/:bundle_id.
+     submit authorized POST /store/api/v0/documents/ request with
+    a document that contains bundles and cache the document URL in
+    the class, the bundles are then queried and the URL of the
+    first bundle returned. Tests are done to check response codes and
+    that at least one bundle is available.
 
+    :param document: document in JSON format
+    :type document: str or unicode
+    :return: URL of bundle
+    :rtype: str or unicode
+    """
+    self.document_url = self.post(document)
     response = requests.get(self.document_url + "/bundles")
     self.assertEqual(requests.codes.ok, response.status_code)    
 
     response_json = json.loads(response.text)
     objects = response_json["objects"]
-    self.assertTrue(len(objects) > 0)
-    bundle_id = objects[0]["id"]
-    bundle_url = self.document_url + "/bundles/" + str(bundle_id)
+    self.assertTrue(len(objects) > 0, msg="Expected at least one bundle")
+
+    bundle_url = self.document_url + "/bundles/" + str(objects[0]["id"])
     response = requests.get(bundle_url)
     self.assertEqual(requests.codes.ok, response.status_code)
-    # Get bundle in each format.
-    for bundle_format in standards.FORMATS:
-      response = requests.get( \
-        bundle_url + "." + bundle_format,
-        headers={http.ACCEPT: ProvStoreTestCase.CONTENT_TYPES[bundle_format]})
-      self.assertEqual(requests.codes.ok, response.status_code)
+    return bundle_url
+
+  def test_get_document_bundles_bundle(self):
+    """Test GET /store/api/v0/documents/:doc_id/bundles/:bundle_id.
+    """
+    # Tests are done in helper method.
+    self.post_bundle(self.get_document("bundle.json"))
+
+  @parameterized.expand(standards.FORMATS)
+  def test_get_document_bundles_bundle_format(self, format):
+    """Test GET /store/api/v0/documents/:doc_id/bundles/:bundle_id(.:format).
+    """
+    bundle_url = self.post_bundle(self.get_document("bundle.json"))
+    # Map format to extension supported by ProvStore
+    if format in ProvStoreTestCase.EXTENSIONS:
+      format = ProvStoreTestCase.EXTENSIONS[format]
+    response = requests.get(bundle_url + "." + format)
+    self.assertEqual(requests.codes.ok, response.status_code)
