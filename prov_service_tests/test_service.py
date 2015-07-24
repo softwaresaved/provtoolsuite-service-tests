@@ -35,7 +35,6 @@ from nose.tools import nottest
 from nose_parameterized import parameterized
 
 from prov_service_tests import standards
-from prov_service_tests.files import load_yaml
 
 @nottest
 class ServiceTestCase(unittest.TestCase):
