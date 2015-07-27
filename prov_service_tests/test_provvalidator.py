@@ -43,6 +43,11 @@ class ProvValidatorTestCase(ServiceTestCase):
   ProvValidator is available and responds to requests directed 
   against its  
   `REST API <https://provenance.ecs.soton.ac.uk/validator/view/api.html>`_.
+
+  The class expects one environment variable to be set:
+
+  - PROVVALIDATOR_URL - ProvValidator base URL e.g.
+    `` https://provenance.ecs.soton.ac.uk/validator/provapi/documents/``
   """
 
   URL_ENV = "PROVVALIDATOR_URL"
@@ -66,10 +71,32 @@ class ProvValidatorTestCase(ServiceTestCase):
   def tearDown(self):
     super(ProvValidatorTestCase, self).tearDown()
 
+  def post_translate(self, document, format=standards.JSON):
+    """Submit POST /provapi/documents to translate a document. The
+    request is requested not to allow redirects and a test is done to
+    check that the response code is 303 SEE OTHER.
+  
+    :param document: document in given format
+    :type document: str or unicode
+    :param format: one of ``prov_service_tests.standards`` formats
+    :type format: str or unicode
+    :return: URL of stored document
+    :rtype: :class:`~requests.Response`
+    """
+    headers={http.CONTENT_TYPE: 
+             ProvValidatorTestCase.CONTENT_TYPES[format]}
+    response = requests.post( \
+      self.url,
+      headers=headers,
+      allow_redirects=False,
+      data=document)
+    self.assertEqual(requests.codes.see_other, response.status_code)
+    return response
+
   @parameterized.expand(list(itertools.product(standards.FORMATS, 
                                                standards.FORMATS)))
-  def test_translate(self, format1, format2):
-    """Test POST /provapi/documents/ on translations between formats.
+  def test_post_translate(self, format1, format2):
+    """Test POST /provapi/documents/ for translation.
     """
     headers = {http.CONTENT_TYPE: ProvValidatorTestCase.CONTENT_TYPES[format1],
                http.ACCEPT: ProvValidatorTestCase.CONTENT_TYPES[format2]}
@@ -78,127 +105,123 @@ class ProvValidatorTestCase(ServiceTestCase):
                              data=self.get_primer(format1))
     self.assertEqual(requests.codes.ok, response.status_code)
 
-  @parameterized.expand(standards.FORMATS)
-  def test_validate(self, format):
-    """Test POST /provapi/documents/ with validate:Validate.
+  def test_translate_get_document(self):
+    """Test GET /provapi/documents/{docId}.
     """
-    response = requests.post( \
-      self.url, 
-      headers={http.ACCEPT: "text/html"},
-      files={"statements": self.get_primer(format)},
-      data={"validate": "Validate", "type": format})
-    self.assertEqual(requests.codes.ok, response.status_code)
+    response = self.post_translate(self.get_primer(standards.JSON),
+                                   standards.JSON)
 
-  def test_get_document(self):
-    """Test GET /provapi/documents/{docId} and GET /provapi/documents/{docId}/original.
-    """
-    # POST /provapi/documents/
-    headers={http.CONTENT_TYPE: 
-             ProvValidatorTestCase.CONTENT_TYPES[standards.JSON]}
-    response = requests.post( \
-      self.url,
-      headers=headers,
-      allow_redirects=False,
-      data=self.get_primer(standards.JSON))
-    self.assertEqual(requests.codes.see_other, response.status_code)
-    # GET /provapi/documents/{docId}
     graph_url = response.headers["location"]
-    response = requests.get(graph_url, allow_redirects=False)
-    self.assertEqual(requests.codes.see_other, response.status_code) 
-    # GET /provapi/documents/{docId}/original
-    response = requests.get(graph_url + "/original", allow_redirects=False)
+    response = requests.get(graph_url)
+    self.assertEqual(requests.codes.ok, response.status_code)
+
+  def test_translate_get_document_original(self):
+    """Test GET /provapi/documents/{docId}/original.
+    """
+    response = self.post_translate(self.get_primer(standards.JSON),
+                                   standards.JSON)
+
+    graph_url = response.headers["location"]
+    response = requests.get(graph_url + "/original")
     self.assertEqual(requests.codes.ok, response.status_code)
 
   @parameterized.expand(standards.FORMATS)
-  def test_get_document_type(self, format):
+  def test_translate_get_document_type(self, format):
     """Test GET /provapi/documents/{docId}.{type}.
     """
-    # POST /provapi/documents/
-    headers={http.CONTENT_TYPE: 
-             ProvValidatorTestCase.CONTENT_TYPES[standards.JSON]}
-    response = requests.post( \
-      self.url,
-      headers=headers,
-      allow_redirects=False,
-      data=self.get_primer(standards.JSON))
-    self.assertEqual(requests.codes.see_other, response.status_code)
+    response = self.post_translate(self.get_primer(standards.JSON),
+                                   standards.JSON)
+
     graph_url = response.headers["location"]
-    # GET /provapi/documents/{docId}.{type}
     response = requests.get(graph_url + "." + format)
     self.assertEqual(requests.codes.ok, response.status_code)
 
-  def test_get_validation_report(self):
-    """Test POST /provapi/documents/validation/report and report.xml
+  @parameterized.expand(standards.FORMATS)
+  def test_post_validate(self, format):
+    """Test POST /provapi/documents for validation.
     """
-    # POST /provapi/documents/
     response = requests.post( \
       self.url, 
-      files={"statements": self.get_primer(standards.JSON)},
+      files={"statements": self.get_primer(format)},
       data={"validate": "Validate", 
-            "type": standards.JSON},
-      allow_redirects=False)
-    self.assertEqual(requests.codes.see_other, response.status_code)
-    # GET /provapi/documents/{docId}/validation/report
-    report_url = response.headers["location"]
-    response = requests.get(report_url)
-    self.assertEqual(requests.codes.ok, response.status_code)
-    # GET /provapi/documents/{docId}/validation/report.xml
-    response = requests.get(report_url + ".xml")
+            "type": format},
+      allow_redirects=True)
     self.assertEqual(requests.codes.ok, response.status_code)
 
-    # How to get graphNNNN more nicely?
-    # Does it work for translated documents?
- 
-    print(report_url)
-    validation_url = report_url.replace("/report", "")
-    print(validation_url)
-    graph_url = validation_url.replace("/validation", "")
-    print(graph_url)
+  def validate(self):
+    """Submit a POST then a GET to validate a document. 
 
-    # GET /provapi/documents/{docId}/metrics Graph metrics
-    print(graph_url + "/metrics")
+    - Submit a POST /provapi/documents request with a sample JSON
+      document.
+    - Get the graph URL from the response header ``location`` field. 
+    - Submit a GET to /provapi/documents/{docId}/validation/report,
+      to validate the document. 
+    - Test that the response to GET is 200 OK. 
+
+    Accessing the validation report is a pre-requisite of
+    validation-related requests including /validation, /metrics,
+    /normalForm and /matrix.
+
+    :return: graph URL
+    :rtype: str or unicode
+    """
+    response = self.post_translate(self.get_primer(standards.JSON),
+                                   standards.JSON)
+    graph_url = response.headers["location"]
+    response = requests.get(graph_url + "/validation/report")
+    self.assertEqual(requests.codes.ok, response.status_code)
+    return graph_url
+
+  def test_get_metrics(self):
+    """Test GET /provapi/documents/{docId}/metrics.
+    """
+    graph_url = self.validate()
+
     response = requests.get(graph_url + "/metrics")
-#    print(response.headers)
-#    print(response.text)
     self.assertEqual(requests.codes.ok, response.status_code)
 
-    # GET /provapi/documents/{docId}/validation/normalForm
-    response = requests.get(validation_url + "/normalForm")
-#    print(response.headers)
-#    print(response.text)
-    self.assertEqual(requests.codes.ok, response.status_code)
-    # GET /provapi/documents/{docId}/validation/normalForm.{type}
-    for f in standards.FORMATS:
-      response = requests.get(validation_url + "/normalForm" + "." + f)
-#      print(response.headers)
-#      print(response.text)
-      self.assertEqual(requests.codes.ok, response.status_code)
+  @parameterized.expand(["txt", "png"])
+  def test_get_validation_matrix_format(self, format):
+    """Test GET /provapi/documents/{docId}/validation/matrix.txt and png.
+    """
+    graph_url = self.validate()
 
-    # GET /provapi/documents/{docId}/validation/matrix - no information resource
-    # Ignore
-    # GET /provapi/documents/{docId}/validation/matrix.txt
-    response = requests.get(validation_url + "/matrix.txt")
-#    print(response.headers)
-#    print(response.text)
+    response = requests.get(graph_url + "/validation/matrix." + format)
     self.assertEqual(requests.codes.ok, response.status_code)
-    # GET /provapi/documents/{docId}/validation/matrix.png
-    response = requests.get(validation_url + "/matrix.png")
-#    print(response.headers)
-#    print(response.text)
+
+  def test_get_validation_matrix_diagonal(self):
+    """Test GET /provapi/documents/{docId}/validation/matrix/diagonal.
+    """
+    graph_url = self.validate()
+
+    response = requests.get(graph_url + "/validation/matrix/diagonal")
     self.assertEqual(requests.codes.ok, response.status_code)
-    response = requests.get(validation_url + "/matrix/diagonal")
-#    print(response.headers)
-#    print(response.text)
+
+  def test_get_validation_normal_form(self):
+    """Test GET /provapi/documents/{docId}/validation/normalForm.
+    """
+    graph_url = self.validate()
+
+    response = requests.get(graph_url + "/validation/normalForm")
+    self.assertEqual(requests.codes.ok, response.status_code)
+
+  @parameterized.expand(standards.FORMATS)
+  def test_get_validation_normal_form_format(self, format):
+    """Test GET /provapi/documents/{docId}/validation/normalForm.{type}.
+    """
+    graph_url = self.validate()
+
+    response = requests.get(graph_url + "/validation/normalForm." + format)
     self.assertEqual(requests.codes.ok, response.status_code)
 
   def test_get_random_nodes_degree(self):
-    """Test GET /provapi/documents/random/{nodes}/{degree}
+    """Test GET /provapi/documents/random/{nodes}/{degree}.
     """
     response = requests.get(self.url + "random/1/1")
     self.assertEqual(requests.codes.ok, response.status_code)
 
   def test_get_random_nodes_degree_seed(self):
-    """Test GET /provapi/documents/random/{nodes}/{degree}/{seed}
+    """Test GET /provapi/documents/random/{nodes}/{degree}/{seed}.
     """
-    response = requests.get(self.url + "random/1/1/1")
+    response = requests.get(self.url + "random/1/2/3")
     self.assertEqual(requests.codes.ok, response.status_code)
