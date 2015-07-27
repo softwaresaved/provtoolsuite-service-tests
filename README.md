@@ -11,14 +11,6 @@ The tests run under Python 2.7+ and Python 3.
 
 [![Build Status](https://travis-ci.org/prov-suite/service-tests.svg)](https://travis-ci.org/prov-suite/service-tests)
 
-## ProvStore tests and API keys
-
-Running ProvStore tests require you to create a ProvStore API Key:
-
-* Log in to [ProvStore](https://provenance.ecs.soton.ac.uk/store)
-* Select Account => Developer Area
-* You will see your API key
-
 ## Running under Travis CI
 
 The tests can be run under [Travis CI](https://travis-ci.org). This respository contains a TravisCI, .travis.yml, job configuration file.
