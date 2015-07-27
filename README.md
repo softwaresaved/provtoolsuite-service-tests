@@ -23,17 +23,21 @@ Running ProvStore tests require you to create a ProvStore API Key:
 
 The tests can be run under [Travis CI](https://travis-ci.org). This respository contains a TravisCI, .travis.yml, job configuration file.
 
-Running ProvStore tests require you to define a Travis CI variable, `PROVSTORE_API_KEY` holding your ProvStore user name and API key:
+Running the service tests under Travis CI require you to:
 
-* Visit your job's settings page in Travis CI
-* Select settings
-* Click Environment Variables
-* Click Add a new variable
-* Name: `PROVSTORE_API_KEY`
-* Value: `user:12345qwert`
-* Ensure Display value in build logs is *not* selected
-
-See [define variables in repository settings](http://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings).
+* Create a ProvStore API Key:
+  - Log in to [ProvStore](https://provenance.ecs.soton.ac.uk/store)
+  - Select Account => Developer Area
+  - You will see your API key
+* Define a Travis CI variable, `PROVSTORE_API_KEY` holding your ProvStore user name and API key:
+  - Visit your job's settings page in Travis CI
+  - Select settings
+  - Click Environment Variables
+  - Click Add a new variable
+  - Name: `PROVSTORE_API_KEY`
+  - Value: `user:qwert12345`
+  - Ensure Display value in build logs is *not* selected  
+  - See [define variables in repository settings](http://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings).
 
 ## Running under Jenkins
 
@@ -43,35 +47,7 @@ See [Running the service tests under Jenkins](./Jenkins.md) which includes an ex
 
 ## Running standalone
 
-The service tests can be run stand-alone. These instructions assume you have:
-
-* Created a ProvStore API Key:
-
-Get these service tests:
-
-```
-$ git clone https://github.com/prov-suite/service-tests
-$ cd service-tests
-$ pip install -r requirements.txt
-```
-
-Edit `setenv.sh` and update ProvStore API key, to use yours:
-
-```
-export PROVSTORE_API_KEY="user:12345qwert"
-```
-
-Set environment variables:
-
-```
-$ source setenv.sh
-```
-
-Run the service tests:
-
-```
-$ nosetests prov_service_tests
-```
+The service tests can be run stand-alone. See [Running the service tests standalone](./Standalone.md).
 
 ## Author
 
