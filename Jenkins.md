@@ -126,7 +126,7 @@ nosetests, with the ``--with-xunit`` option set, outputs test results in xUnit-c
 * Click Configure
 * Scroll down to Post-build Action
 * Select Add post-build action => Publish JUnit test result report
-* Test report XMLs: test-harness/nosetests.xml
+* Test report XMLs: service-tests/nosetests.xml
   - If you get a warning that nosetests.xml doesn't match anything you can ignore this as the file hasn't been created yet
 * Click Save
 * Click Build Now

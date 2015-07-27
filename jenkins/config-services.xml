@@ -32,7 +32,7 @@ nosetests -v --with-xunit prov_service_tests
   </builders>
   <publishers>
     <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.2-beta-4">
-      <testResults>test-harness/nosetests.xml</testResults>
+      <testResults>service-tests/nosetests.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <testDataPublishers/>
       <healthScaleFactor>1.0</healthScaleFactor>
