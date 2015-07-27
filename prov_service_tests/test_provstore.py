@@ -41,6 +41,13 @@ class ProvStoreTestCase(ServiceTestCase):
   """Test class for ProvStore service. These tests check that
   ProvStore is available and responds to requests directed against its  
   `REST API <https://provenance.ecs.soton.ac.uk/store/help/api/>`_.
+
+  The class expects two environment variables to be set:
+
+  - ``PROVSTORE_URL`` - ProvStore base URL e.g.
+    ``https://provenance.ecs.soton.ac.uk/store/api/v0/documents/``
+  - ``PROVSTORE_API_KEY`` - ProvStore user name and API key e.g.
+    ``user:12345qwert``
   """
 
   URL_ENV = "PROVSTORE_URL"
@@ -71,7 +78,8 @@ class ProvStoreTestCase(ServiceTestCase):
   def setUp(self):
     super(ProvStoreTestCase, self).setUp()
     self.url = os.environ[ProvStoreTestCase.URL_ENV]
-    self.authorization = "ApiKey " + os.environ[ProvStoreTestCase.API_KEY_ENV]
+    self.authorization = "ApiKey " + \
+        os.environ[ProvStoreTestCase.API_KEY_ENV]
     self.document_url = None
 
   def tearDown(self):
@@ -81,7 +89,8 @@ class ProvStoreTestCase(ServiceTestCase):
         self.document_url, 
         headers={http.AUTHORIZATION: self.authorization})
       if response.status_code != requests.codes.no_content:
-        print("Warning: " + self.document_url + " may not have been deleted")
+        print("Warning: " + self.document_url + 
+              " may not have been deleted")
 
   def post(self, document, format=standards.JSON):
     """Submit authorized POST /store/api/v0/documents/
@@ -144,6 +153,7 @@ class ProvStoreTestCase(ServiceTestCase):
     """Test GET /store/api/v0/documents/:id.:format.
     """
     self.document_url = self.post(self.get_primer(standards.JSON))
+
     # Map format to extension supported by ProvStore
     if format in ProvStoreTestCase.EXTENSIONS:
       format = ProvStoreTestCase.EXTENSIONS[format]
@@ -160,7 +170,8 @@ class ProvStoreTestCase(ServiceTestCase):
 
   def post_bundle(self, document):
     """Submit GET /store/api/v0/documents/:doc_id/bundles/:bundle_id.
-     submit authorized POST /store/api/v0/documents/ request with
+
+    Submit authorized POST /store/api/v0/documents/ request with
     a document that contains bundles and cache the document URL in
     the class, the bundles are then queried and the URL of the
     first bundle returned. Tests are done to check response codes and
@@ -172,6 +183,7 @@ class ProvStoreTestCase(ServiceTestCase):
     :rtype: str or unicode
     """
     self.document_url = self.post(document)
+
     response = requests.get(self.document_url + "/bundles")
     self.assertEqual(requests.codes.ok, response.status_code)    
 
@@ -187,7 +199,6 @@ class ProvStoreTestCase(ServiceTestCase):
   def test_get_document_bundles_bundle(self):
     """Test GET /store/api/v0/documents/:doc_id/bundles/:bundle_id.
     """
-    # Tests are done in helper method.
     self.post_bundle(self.get_document("bundle.json"))
 
   @parameterized.expand(standards.FORMATS)
@@ -195,6 +206,7 @@ class ProvStoreTestCase(ServiceTestCase):
     """Test GET /store/api/v0/documents/:doc_id/bundles/:bundle_id(.:format).
     """
     bundle_url = self.post_bundle(self.get_document("bundle.json"))
+
     # Map format to extension supported by ProvStore
     if format in ProvStoreTestCase.EXTENSIONS:
       format = ProvStoreTestCase.EXTENSIONS[format]
