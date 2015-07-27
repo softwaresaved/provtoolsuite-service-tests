@@ -1,4 +1,4 @@
-# Running the interoperability test harness standalone
+# Running the service tests standalone
 
 The instructions have been written with reference to the 64-bit [Ubuntu](http://www.ubuntu.com/) 14.04.2 operating system.
 

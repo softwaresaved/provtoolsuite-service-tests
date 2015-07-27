@@ -105,7 +105,7 @@ Add step to run all service tests:
 * Select Add build step => Execute shell
 
 ```
-cd test-harness
+cd service-tests
 nosetests -v --with-xunit prov_service_tests
 ```
 
@@ -118,7 +118,7 @@ nosetests -v --with-xunit prov_service_tests
 
 The Execute shell steps can, alternatively, be done within a single Execute shell entry.
 
-If you are only interested in running interoperability tests for a specific omponent then use the relevant line from:
+If you are only interested in running tests for a specific service then use the relevant line from:
 
 ```
 nosetests -v --with-xunit prov_service_tests.test_provstore
@@ -166,14 +166,14 @@ You can browse the nosetests test results. These are hierarchically organised by
 
 ## Importing a Jenkins job
 
-[config-interop.xml](./jenkins/config-services.xml) contains the Jenkins configuration file for the job written following the above instructions. Assuming you have already done:
+[config-services.xml](./jenkins/config-services.xml) contains the Jenkins configuration file for the job written following the above instructions. Assuming you have already done:
 
 * Install dependencies
 * Get ProvStore API key
 * Install Jenkins
 * Install workspace cleanup plugin
 
-Edit jenkins/config-interop.xml and in the line:
+Edit jenkins/config-services.xml and in the line:
 
 ```
 export PROVSTORE_API_KEY=&quot;user:12345qwert&quot;
