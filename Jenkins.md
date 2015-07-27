@@ -88,24 +88,17 @@ cd service-tests
 pip install -r requirements.txt
 ```
 
-Add steps to configure test environment
+Add step to run all service tests:
+
 
 * Select Add build step => Execute shell
 * Enter the following, replacing `user:12345qwert` with your ProvStore API key:
 
 ```
+cd service-tests
 export PROVVALIDATOR_URL=https://provenance.ecs.soton.ac.uk/validator/provapi/documents/
 export PROVSTORE_URL=https://provenance.ecs.soton.ac.uk/store/api/v0/documents/
 export PROVSTORE_API_KEY="user:12345qwert"
-
-```
-
-Add step to run all service tests:
-
-* Select Add build step => Execute shell
-
-```
-cd service-tests
 nosetests -v --with-xunit prov_service_tests
 ```
 
