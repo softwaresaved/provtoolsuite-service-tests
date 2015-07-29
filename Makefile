@@ -13,7 +13,7 @@ clean-pyc:
 apidocs:
 	rm -f apidocs/prov_service_tests.rst
 	rm -f apidocs/modules.rst
-	rm -f apidocs/_build
+	rm -rf apidocs/_build
 	sphinx-apidoc -o apidocs/ prov_service_tests
 	$(MAKE) -C apidocs clean
 	$(MAKE) -C apidocs html
