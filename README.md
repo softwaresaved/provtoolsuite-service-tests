@@ -47,8 +47,7 @@ To create API documentation in `apidocs/_build/html`:
 
 ```
 $ pip install sphinx
-$ cd apidocs
-$ make html
+$ make apidocs
 ```
 
 ## Author
