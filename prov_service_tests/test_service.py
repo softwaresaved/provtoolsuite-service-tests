@@ -61,8 +61,8 @@ class ServiceTestCase(unittest.TestCase):
     :type file_name: str or unicode
     :return: document
     :rtype: str or unicode
-    :raises OSError: 
-      if there are problems accessing the directory or loading the file
+    :raises OSError: if there are problems accessing the directory or
+      loading the file 
     """
     directory = os.path.join(
       os.path.dirname(os.path.abspath(inspect.getfile(
@@ -79,7 +79,7 @@ class ServiceTestCase(unittest.TestCase):
     :type format: str or unicode
     :return: document
     :rtype: str or unicode
-    :raises OSError: 
-      if there are problems accessing the directory or loading the file
+    :raises OSError: if there are problems accessing the directory or
+      loading the file 
     """
     return self.get_document(ServiceTestCase.PRIMER_DOCUMENTS[format])
