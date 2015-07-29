@@ -79,7 +79,7 @@ class ServiceTestCase(unittest.TestCase):
     :type format: str or unicode
     :return: document
     :rtype: str or unicode
-    :raise: OSError: 
+    :raises OSError: 
       if there are problems accessing the directory or loading the file
     """
     return self.get_document(ServiceTestCase.PRIMER_DOCUMENTS[format])
