@@ -1,4 +1,4 @@
-"""W3C PROV constants.
+"""W3C `PROV <http://www.w3.org/TR/prov-overview/>`_ constants.
 """
 # Copyright (c) 2015 University of Southampton
 #

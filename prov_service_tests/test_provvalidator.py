@@ -1,4 +1,4 @@
-"""Test class for ProvValidator service``.
+"""Test class for ProvValidator service.
 """
 # Copyright (c) 2015 University of Southampton
 #
@@ -41,13 +41,13 @@ from prov_service_tests.test_service import ServiceTestCase
 class ProvValidatorTestCase(ServiceTestCase):
   """Test class for ProvValidator service. These tests check that
   ProvValidator is available and responds to requests directed 
-  against its  
-  `REST API <https://provenance.ecs.soton.ac.uk/validator/view/api.html>`_.
+  against the 
+  `ProvValidator REST API <https://provenance.ecs.soton.ac.uk/validator/view/api.html>`_.
 
   The class expects one environment variable to be set:
 
-  - PROVVALIDATOR_URL - ProvValidator base URL e.g.
-    `` https://provenance.ecs.soton.ac.uk/validator/provapi/documents/``
+  - ``PROVVALIDATOR_URL`` - ProvValidator base URL e.g.
+    ``https://provenance.ecs.soton.ac.uk/validator/provapi/documents/``
   """
 
   URL_ENV = "PROVVALIDATOR_URL"
@@ -60,9 +60,10 @@ class ProvValidatorTestCase(ServiceTestCase):
     standards.TRIG: "application/trig",
     standards.PROVX: "application/provenance+xml",
     standards.JSON: "application/json"
-   }
-  """dict: mapping from formats in ``prov_service_tests.standards`` to
-    content types """
+  }
+  """dict: mapping from :mod:`prov_service_tests.standards` formats to
+  content types understood by ProvStore
+  """
 
   def setUp(self):
     super(ProvValidatorTestCase, self).setUp()
@@ -78,10 +79,10 @@ class ProvValidatorTestCase(ServiceTestCase):
   
     :param document: document in given format
     :type document: str or unicode
-    :param format: one of ``prov_service_tests.standards`` formats
+    :param format: a :mod:`prov_service_tests.standards` format
     :type format: str or unicode
     :return: URL of stored document
-    :rtype: :class:`~requests.Response`
+    :rtype: :class:`requests.Response`
     """
     headers={http.CONTENT_TYPE: 
              ProvValidatorTestCase.CONTENT_TYPES[format]}
@@ -149,12 +150,13 @@ class ProvValidatorTestCase(ServiceTestCase):
     self.assertEqual(requests.codes.ok, response.status_code)
 
   def validate(self):
-    """Submit a POST then a GET to validate a document. 
-
-    - Submit a POST /provapi/documents request with a sample JSON
+    """Submit POST /provapi/documents then GET
+      /provapi/documents/{docId}/validation/report to validate
       document.
+
+    - Submit POST /provapi/documents request with a JSON document.
     - Get the graph URL from the response header ``location`` field. 
-    - Submit a GET to /provapi/documents/{docId}/validation/report,
+    - Submit GET /provapi/documents/{docId}/validation/report,
       to validate the document. 
     - Test that the response to GET is 200 OK. 
 
