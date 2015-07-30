@@ -41,6 +41,15 @@ See [Running the service tests under Jenkins](./Jenkins.md) which includes an ex
 
 The service tests can be run stand-alone. See [Running the service tests standalone](./Standalone.md).
 
+## API documentation
+
+To create API documentation in `apidocs/_build/html`:
+
+```
+$ pip install sphinx
+$ make apidocs
+```
+
 ## Author
 
 Developed by [The Software Sustainability Institute](http://www.software.ac.uk>) and the [Provenance Tool Suite](http://provenance.ecs.soton.ac.uk/) team at [Electronics and Computer Science](http://www.ecs.soton.ac.uk) at the [University of Southampton](http://www.soton.ac.uk).

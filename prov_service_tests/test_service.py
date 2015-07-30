@@ -1,4 +1,4 @@
-"""Base class for service tests``.
+"""Base class for service tests.
 """
 # Copyright (c) 2015 University of Southampton
 #
@@ -49,18 +49,20 @@ class ServiceTestCase(unittest.TestCase):
     standards.PROVX: "primer.provx",
     standards.JSON: "primer.json"
   }
-  """dict: mapping ``prov_service_tests.standards to primer.* files"""
+  """dict: mapping :mod:`prov_service_tests.standards` values
+     to `primer.*` files
+  """
 
   def get_document(self, file_name):
-    """Load document with given name from "documents" directory
-    assumed to be in the same directory as the calling test class.
-    
+    """Load a document from a file relative to a ``documents``
+    directory assumed to be in the same directory as the caller.
+
     :param file_name: file name
     :type file_name: str or unicode
-    :returns: document
+    :return: document
     :rtype: str or unicode
-    :raises OSError: if there are problems accessing the directory
-    or loading the file
+    :raises OSError: if there are problems accessing the directory or
+      loading the file 
     """
     directory = os.path.join(
       os.path.dirname(os.path.abspath(inspect.getfile(
@@ -69,15 +71,15 @@ class ServiceTestCase(unittest.TestCase):
           return f.read()
 
   def get_primer(self, format):
-    """Load "primer" document of given format from "documents"
-    directory assumed to be in the same directory as the calling test
-    class. 
-    
-    :param format: one of ``prov_service_tests.standards``
+    """Load document a from a ``primer.format`` file within a 
+    ``documents`` directory assumed to be in the same directory as the
+    caller.
+
+    :param format: a :mod:`prov_service_tests.standards` value
     :type format: str or unicode
-    :returns: document
+    :return: document
     :rtype: str or unicode
-    :raises OSError: if there are problems accessing the directory
-    or loading the file
+    :raises OSError: if there are problems accessing the directory or
+      loading the file 
     """
     return self.get_document(ServiceTestCase.PRIMER_DOCUMENTS[format])

@@ -1,4 +1,4 @@
-"""Test class for ProvStore service``.
+"""Test class for ProvStore service.
 """
 # Copyright (c) 2015 University of Southampton
 #
@@ -39,8 +39,8 @@ from prov_service_tests.test_service import ServiceTestCase
 @istest
 class ProvStoreTestCase(ServiceTestCase):
   """Test class for ProvStore service. These tests check that
-  ProvStore is available and responds to requests directed against its  
-  `REST API <https://provenance.ecs.soton.ac.uk/store/help/api/>`_.
+  ProvStore is available and responds to requests directed against the
+  `ProvStore REST API <https://provenance.ecs.soton.ac.uk/store/help/api/>`_.
 
   The class expects two environment variables to be set:
 
@@ -51,12 +51,12 @@ class ProvStoreTestCase(ServiceTestCase):
   """
 
   URL_ENV = "PROVSTORE_URL"
-  """str or unicode: environment variable holding ProvStore URL
+  """str or unicode: namr of environment variable holding ProvStore
+  URL
   """
 
   API_KEY_ENV = "PROVSTORE_API_KEY"
-  """str or unicode: environment variable holding ProvStore API
-  key
+  """str or unicode: environment variable holding ProvStore API key
   """
 
   CONTENT_TYPES = {
@@ -66,14 +66,16 @@ class ProvStoreTestCase(ServiceTestCase):
     standards.PROVX: "application/xml",
     standards.JSON: "application/json"
   }
-  """dict: mapping from formats in ``prov_service_tests.standards``
-  to content types understood by ProvStore
+  """dict: mapping from :mod:`prov_service_tests.standards` formats to
+  content types understood by ProvStore
   """
 
-  EXTENSIONS = {standards.PROVX: "xml"}
-  """dict: mapping from formats in ``prov_service_tests.standards`` to
+  EXTENSIONS = {
+    standards.PROVX: "xml"
+  }
+  """dict: mapping from :mod:`prov_service_tests.standards` formats to
   file extensions understood by ProvStore
-` """
+  """
 
   def setUp(self):
     super(ProvStoreTestCase, self).setUp()
@@ -93,13 +95,13 @@ class ProvStoreTestCase(ServiceTestCase):
               " may not have been deleted")
 
   def post(self, document, format=standards.JSON):
-    """Submit authorized POST /store/api/v0/documents/
-    request. The document URL is cached by the class. A test is done
-    to check that the response code is 201 CREATED.
+    """Submit authorized POST /store/api/v0/documents/.
+    The document URL is cached by the class. A test is done to check
+    that the response code is 201 CREATED.
     
     :param document: document in given format
     :type document: str or unicode
-    :param format: one of ``prov_service_tests.standards`` formats
+    :param format: a :mod:`prov_service_tests.standards` format
     :type format: str or unicode
     :return: URL of stored document
     :rtype: str or unicode
@@ -171,11 +173,18 @@ class ProvStoreTestCase(ServiceTestCase):
   def post_bundle(self, document):
     """Submit GET /store/api/v0/documents/:doc_id/bundles/:bundle_id.
 
-    Submit authorized POST /store/api/v0/documents/ request with
-    a document that contains bundles and cache the document URL in
-    the class, the bundles are then queried and the URL of the
-    first bundle returned. Tests are done to check response codes and
-    that at least one bundle is available.
+    - Submit authorized POST /store/api/v0/documents/ with a document
+      that contains bundles. 
+    - Extract the document URL from HTTP response.
+    - Cache the document URL in the class.
+    - Submit GET /store/api/v0/documents/:doc_id/bundles/ request.
+    - Get the  URL of the first bundle.
+    - Submit GET /store/api/v0/documents/:doc_id/bundles/:bundle_id
+      request. 
+    - Return bundle URL.
+
+    Tests are done to check response codes and that at least one
+    bundle is available.
 
     :param document: document in JSON format
     :type document: str or unicode
