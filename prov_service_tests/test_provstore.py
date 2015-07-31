@@ -162,6 +162,24 @@ class ProvStoreTestCase(ServiceTestCase):
     response = requests.get(self.document_url + "." + format)
     self.assertEqual(requests.codes.ok, response.status_code)
 
+  def test_get_document_flattened(self):
+    """Test GET /store/api/v0/documents/:id/flattened/.
+    """
+    self.document_url = self.post(self.get_primer(standards.JSON))
+    headers = {http.ACCEPT: ProvStoreTestCase.CONTENT_TYPES[standards.PROVN]}
+    response = requests.get(self.document_url + "/flattened",
+                            headers=headers)
+    self.assertEqual(requests.codes.ok, response.status_code)
+
+  def test_get_document_flattened_views_data(self):
+    """Test GET /store/api/v0/documents/:id/flattened/views/data.
+    """
+    self.document_url = self.post(self.get_primer(standards.JSON))
+    headers = {http.ACCEPT: ProvStoreTestCase.CONTENT_TYPES[standards.PROVN]}
+    response = requests.get(self.document_url + "/flattened/views/data",
+                            headers=headers)
+    self.assertEqual(requests.codes.ok, response.status_code)
+
   def test_get_document_bundles(self):
     """Test GET /store/api/v0/documents/:id/bundles.
     """
