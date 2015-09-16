@@ -43,3 +43,9 @@ To run tests for a specific service:
 $ nosetests -v prov_service_tests.test_provstore
 $ nosetests -v prov_service_tests.test_provvalidator
 ```
+
+If you are running on a multi-processor machine then the tests can run in parallel, using nosetests' support for [parallel testing](http://nose.readthedocs.org/en/latest/doc_tests/test_multiprocess/multiprocess.html). Specify the number of processes you want to use using a `--processes` flag e.g.
+
+```
+$ nosetests --processes=4 -v prov_service_tests
+```
