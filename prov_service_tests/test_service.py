@@ -39,6 +39,8 @@ from prov_service_tests import standards
 @nottest
 class ServiceTestCase(unittest.TestCase):
 
+  _multiprocess_can_split_ = True
+
   def setUp(self):
     super(ServiceTestCase, self).setUp()
 

@@ -111,7 +111,7 @@ class ProvStoreTestCase(ServiceTestCase):
                http.AUTHORIZATION: self.authorization}
     request = {"content": document, 
                "public": True, 
-               "rec_id": self.__class__.__name__}
+               "rec_id": self.__class__.__name__ + str(os.getpid())}
     response = requests.post(self.url, 
                              headers=headers, 
                              data=json.dumps(request))
